@@ -89,7 +89,31 @@ void node::insert(int val, node* curr)
             done = true;
 
             //3 cases
+            //left left
+            // if(curr->left != nullptr)
+            // {
+            //     if(curr->left->left->data == val)
+            //     {
 
+            //     }
+            //     else if(curr->left->right-> == val)
+            //     {
+
+            //     } 
+            // }
+            // else if(curr->right != nullptr)
+            // {
+            //     if(curr->right->right->data == val)
+            //     {
+
+            //     }
+            // }
+
+            //right right
+
+            //right left
+
+            //left right
         }
     }
 }
