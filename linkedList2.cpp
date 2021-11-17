@@ -20,16 +20,31 @@ node* node::last = nullptr;
 
 int main()
 {
-    node::insert(1);
-    node::insert(2);
-    node::insert(3);
-    node::insert(4);
-    node::insert(5);
-    node::insert(6);
+    
+    while(1)
+    {
+        int choice;
+        cout << "\n\n1. Insert\n2. Print\n3. Exit\n\nYour Choice: ";
+        cin >> choice;
 
-    node::insertAt(9, 7);
+        switch (choice)
+        {
+        case 1:
+            int val; cout << "Value: ";
+            cin >> val;
+            node::insert(val);
+            break;
+        case 2:
+            cout << "Printing: ";
+            node::print();
+            break;
+        case 3:
+            return 0;
+        default:
+            cout << "Enter a valid choice...\n\n\n";
+        }
 
-    node::print();
+    }
 
     return 0;
 }
