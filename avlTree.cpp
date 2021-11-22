@@ -4,17 +4,16 @@ using namespace std;
 struct node
 {
 private:
-    int data;
-    node* left, *right;
-    static node* root;
     static node* balanceNode(node*);
 public:
-    node(int val) { data = val; this->left = this->right = nullptr; }
-    static void insert(int, node* curr=root);
+    int diff;
+    node* left, *right;
+    static node* root;
+    int data;
+    node(int val) { data = val; this->left = this->right = nullptr; diff = 0; }
+    static void insert(int, node*& curr=root);
     static void print(node* temp = root);
     static void deleteNode(int, node* prev = root, node* curr = root);
-
-
 };
 
 node* node::root = nullptr;
@@ -25,123 +24,105 @@ int main()
     node::insert(4);
     node::insert(5);
     node::insert(8);
-    node::insert(7);
-    node::insert(1);
-    node::insert(2);
-    node::insert(0);
     
-    cout << "BST: ";
+    cout << "root " << node::root << " " << node::root->data << " " << node::root->left << " " << node::root->right << " " << node::root->diff << endl;
+    cout << "left " << node::root->left << " " << node::root->left->data << " " << node::root->left->left << " " << node::root->left->right << " " << node::root->left->diff << endl;
+    cout << "right " << node::root->right << " " << node::root->right->data << " " << node::root->right->left << " " << node::root->right->right << " " << node::root->right->diff << endl;
+    // node::insert(7);
+    // node::insert(12);
+    // node::insert(2);
+    // node::insert(0);
+    
+    cout << "AVL: ";
     node::print();
     cout << endl;
 
-    node::deleteNode(6);
-    node::deleteNode(4);
-    node::deleteNode(5);
-    node::deleteNode(8);
-    node::deleteNode(7);
-    node::deleteNode(1);
-    node::deleteNode(2);
-    node::deleteNode(0);
-
-    cout << "BST: ";
+    cout << "AVL: ";
     node::print();
     cout << endl;
 
     return 0;
 }
 
-void node::insert(int val, node* curr)
+void node::insert(int val, node*& curr)
 {
-    static bool done = false;
+    static int l = 0;
+    static int r = 0;
+    static bool notBalanced = 0;
+    static node* notBalancedNode = nullptr;
+    static char firstOne = 'l';
 
-    if(curr == root)
-        root = new node(val);
-    else if(val <= curr->data)
+    if(curr==nullptr)
     {
-        if(curr->left != nullptr)
+        curr = new node(val);
+        return;
+    }
+
+    if(val <= curr->data)
+    {
+        ++curr->diff;
+    }
+    else
+        --curr->diff;
+
+    if(curr->diff == 2 || curr->diff == -2)
+    {
+        notBalanced = true;
+        notBalancedNode = curr;
+        if(val <= curr->data)
         {
-            insert(val, curr->left);
+            firstOne = 'l';
+        }
+        else
+            firstOne = 'r';
+    }
+
+    if(val <= curr->data)
+    {
+        if(notBalanced) ++l;
+        insert(val, curr->left);
+    }
+    else
+    {
+        if(notBalanced) ++r;
+        insert(val, curr->right);
+    }
+
+    if(notBalancedNode == curr)
+    {
+        node* temp;
+        if( l == 2 ) // means l-l
+        {
+            temp = curr->left;
+            temp->right = curr;
+            curr->left = nullptr;
+        }
+        else if( r == 2 ) // means r-r
+        {
+            cout << "a";
         }
         else
         {
-            curr->left = new node(val);
-            curr = curr->left;
+            if(firstOne == 'l') // means l-r
+            {
+                temp = curr->left->right;
+                temp->right = curr;
+                temp->left = curr->left;
+                curr->left->right = nullptr;
+                curr->left = nullptr;
+                ++temp->left->diff;
+                
+            }
+            else // means r-l
+            {
+                cout << "a";
+            }
         }
+        l = r = notBalanced = curr->diff = 0;
+
+        if(curr == root)
+            root = temp;   
     }
-    else if(val > curr->data)
-    {
-        if(curr->right != nullptr)
-        {
-            insert(val, curr->right);
-        }
-        else
-        {
-            curr->right = new node(val);
-            curr = curr->right;
-        }
-    }
-
-    if(!done)
-    {
-        if(balanceNode(curr) == nullptr) return;
-        else
-        {
-            done = true;
-
-            //3 cases
-            //left left
-            // if(curr->left != nullptr)
-            // {
-            //     if(curr->left->left->data == val)
-            //     {
-
-            //     }
-            //     else if(curr->left->right-> == val)
-            //     {
-
-            //     } 
-            // }
-            // else if(curr->right != nullptr)
-            // {
-            //     if(curr->right->right->data == val)
-            //     {
-
-            //     }
-            // }
-
-            //right right
-
-            //right left
-
-            //left right
-        }
-    }
-}
-
-node* node::balanceNode(node* curr)
-{
-    static int leftCount = 0;
-    static int rightCount = 0;
-
-    if(curr == nullptr)
-        return nullptr;
-    
-    if(curr->left != nullptr)
-    {
-        ++leftCount;
-        //balanceNode(curr->left);
-    }
-    
-    if(curr->right != nullptr)
-    {
-        ++rightCount;
-        //balanceNode(curr->right);
-    }
-
-    if(leftCount-rightCount <= 1 || leftCount-rightCount >= -1)
-        return nullptr;
-    
-    return curr;
 }
 
 void node::print(node* temp)
