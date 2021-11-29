@@ -3,7 +3,12 @@
 #include <iostream>
 using namespace std;
 
-struct node
+struct singl
+{
+    
+};
+
+class node
 {
 private:
     int data;
@@ -15,7 +20,7 @@ public:
     static void print(node* temp = root);
     static void deleteNode(int, node* prev = root, node* curr = root);
 
-
+    void insert(int val, node*& ptr);
 };
 
 node* node::root = nullptr;
@@ -71,7 +76,7 @@ void node::insert(int val, node* addThis, node* temp)
             temp->right = new node(val);
 }
 
-void node::print(node* temp)
+void node::print(node* temp) // in-order
 {
     if(temp==nullptr)
         return;
@@ -114,12 +119,11 @@ void node::deleteNode(int val, node* prev, node* curr)
                 prev->right = nullptr;
             else
                 prev->left = nullptr;
-
-            delete curr;
         }
         else if(curr->left != nullptr && curr->right != nullptr)
         {
             node::insert(curr->left->data, curr->left, curr->right);
+            
             if(curr == root)
             {
                 root = curr->right;
@@ -133,7 +137,6 @@ void node::deleteNode(int val, node* prev, node* curr)
                 else
                     prev->right = curr->right;
             }
-            delete curr;
         }
         else if(curr->left != nullptr)
         {
@@ -149,7 +152,6 @@ void node::deleteNode(int val, node* prev, node* curr)
             {
                 prev->left = curr->left;
             }
-            delete curr;
         }
         else
         {
@@ -165,7 +167,8 @@ void node::deleteNode(int val, node* prev, node* curr)
             {
                 prev->left = curr->right;
             }
-            delete curr;
         }
+
+        delete curr;
     }
 }
