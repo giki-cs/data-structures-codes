@@ -1,227 +1,134 @@
-//Avl Trees Changed
-
 #include <iostream>
 using namespace std;
 
-struct node
+class avlNode
 {
 private:
-    static node* balanceNode(node*);
-public:
-    int diff;
-    node* left, *right;
-    static node* root;
+    int height;
     int data;
-    node(int val) { data = val; this->left = this->right = nullptr; diff = 0; }
-    static void insert(int, node*& curr=root);
-    static void print(node* temp = root);
-    static void deleteNode(int, node* prev = root, node* curr = root);
+    avlNode *left, *right;
+
+    static avlNode* root;
+
+public:
+    avlNode(int val): data(val), left(nullptr), right(nullptr), height(0) {} // initialize (not assign)
+    static void insert(int val, avlNode*& curr = root, avlNode*& prev=root);
+    static int heightOf(avlNode*& curr) { if(!curr) return -1; return curr->height; }
+    static avlNode* lr(avlNode*& curr);
+    static avlNode* rr(avlNode*& curr);
+    static avlNode* rl(avlNode*& curr);
+    static avlNode* ll(avlNode*& curr);
+    static void setHeight(avlNode*& curr);
 };
 
-node* node::root = nullptr;
+avlNode* avlNode::root = nullptr;
 
 int main()
 {
-    node::insert(6);
-    node::insert(4);
-    node::insert(5);
-    node::insert(8);
-    
-    cout << "root " << node::root << " " << node::root->data << " " << node::root->left << " " << node::root->right << " " << node::root->diff << endl;
-    cout << "left " << node::root->left << " " << node::root->left->data << " " << node::root->left->left << " " << node::root->left->right << " " << node::root->left->diff << endl;
-    cout << "right " << node::root->right << " " << node::root->right->data << " " << node::root->right->left << " " << node::root->right->right << " " << node::root->right->diff << endl;
-    // node::insert(7);
-    // node::insert(12);
-    // node::insert(2);
-    // node::insert(0);
-    
-    cout << "AVL: ";
-    node::print();
-    cout << endl;
-
-    cout << "AVL: ";
-    node::print();
-    cout << endl;
 
     return 0;
 }
 
-void node::insert(int val, node*& curr)
-{
-    static int l = 0;
-    static int r = 0;
-    static bool notBalanced = 0;
-    static node* notBalancedNode = nullptr;
-    static char firstOne = 'l';
-
-    if(curr==nullptr)
-    {
-        curr = new node(val);
-        return;
-    }
-
-    if(val <= curr->data)
-    {
-        ++curr->diff;
-    }
-    else
-        --curr->diff;
-
-    if(curr->diff == 2 || curr->diff == -2)
-    {
-        notBalanced = true;
-        notBalancedNode = curr;
-        if(val <= curr->data)
-        {
-            firstOne = 'l';
-        }
-        else
-            firstOne = 'r';
-    }
-
-    if(val <= curr->data)
-    {
-        if(notBalanced) ++l;
-        insert(val, curr->left);
-    }
-    else
-    {
-        if(notBalanced) ++r;
-        insert(val, curr->right);
-    }
-
-    if(notBalancedNode == curr)
-    {
-        node* temp;
-        if( l == 2 ) // means l-l
-        {
-            temp = curr->left;
-            temp->right = curr;
-            curr->left = nullptr;
-        }
-        else if( r == 2 ) // means r-r
-        {
-            cout << "a";
-        }
-        else
-        {
-            if(firstOne == 'l') // means l-r
-            {
-                temp = curr->left->right;
-                temp->right = curr;
-                temp->left = curr->left;
-                curr->left->right = nullptr;
-                curr->left = nullptr;
-                ++temp->left->diff;
-                
-            }
-            else // means r-l
-            {
-                cout << "a";
-            }
-        }
-        l = r = notBalanced = curr->diff = 0;
-
-        if(curr == root)
-            root = temp;   
-    }
-}
-
-void node::print(node* temp)
-{
-    if(temp==nullptr)
-        return;
-
-    print(temp->left);
-    cout << temp->data << " ";
-    print(temp->right);
-}
-
-void node::deleteNode(int val, node* prev, node* curr)
+void avlNode::insert(int val, avlNode*& curr, avlNode*& prev)
 {
     if(curr == nullptr)
     {
-        return;
+        curr = new avlNode(val);
     }
-
     else if(val < curr->data)
     {
-        if(curr->left != nullptr)
-        {
-            deleteNode(val, curr, curr->left);
-        }
-    }
-    else if(val > curr->data)
-    {
-        if(curr->right != nullptr)
-        {
-            deleteNode(val, curr, curr->right);
-        }
-    }
-    else if(val == curr->data)
-    {
-        if(curr->left == nullptr && curr->right == nullptr)
-        {
-            if(curr == root)
-            {
-                root = nullptr;
-            }
-            else if(curr == prev->right)
-                prev->right = nullptr;
-            else
-                prev->left = nullptr;
+        insert(val, curr->left, curr);
+        curr->height = heightOf(curr->left) - heightOf(curr->right);
 
-            delete curr;
-        }
-        else if(curr->left != nullptr && curr->right != nullptr)
+        if(curr->height == 2)
         {
-            //node::insert(curr->left->data, curr->left, curr->right);
-            if(curr == root)
+            if(heightOf(curr->right) == -1)
             {
-                root = curr->right;
+                //ll
+                prev->left = ll(curr);
+
             }
             else
             {
-                if(prev->left == curr)
-                {
-                    prev->left = curr->right;
-                }
-                else
-                    prev->right = curr->right;
+                //lr
+                prev->left = lr(curr);
             }
-            delete curr;
-        }
-        else if(curr->left != nullptr)
-        {
-            if(root == curr)
-            {
-                root = curr->left;
-            }
-            else if(curr->data > prev->data)
-            {
-                prev->right = curr->left;
-            }
-            else
-            {
-                prev->left = curr->left;
-            }
-            delete curr;
-        }
-        else
-        {
-            if(root == curr)
-            {
-                root = curr->right;
-            }
-            else if(curr->data > prev->data)
-            {
-                prev->right = curr->right;
-            }
-            else
-            {
-                prev->left = curr->right;
-            }
-            delete curr;
         }
     }
+    else // take care for duplicate data
+    {
+        insert(val, curr->right, curr);
+        curr->height = heightOf(curr->right) - heightOf(curr->left);
+
+        if(curr->height == 2)
+        {
+            //rr or //rl
+            if(heightOf(curr->right) == 1)
+            {
+
+            }
+            else
+            {
+                curr->right = rl(curr);
+                prev->right = rr(curr);
+            }
+        }
+    }
+}
+
+avlNode* avlNode::lr(avlNode*& curr)
+{
+    avlNode* b = curr->left;
+    avlNode* c = b->right;
+
+    b->right = c->left;
+    c->left = b;
+
+    return c;
+}
+
+avlNode* avlNode::rl(avlNode*& curr)//done
+{
+    avlNode* b = curr->right;
+    avlNode* c = b->left;
+
+    b->left = c->right;
+    c->right = b;
+
+    setHeight(b);
+    setHeight(c);
+    setHeight(curr);
+
+    return c;
+}
+
+avlNode* avlNode::ll(avlNode*& curr)//done
+{
+    avlNode* b = curr->left;
+
+    curr->left = b->right;
+    b->right = curr;
+
+    setHeight(curr);
+    setHeight(b);
+
+    return b;
+}
+
+avlNode* avlNode::rr(avlNode*& curr)//done
+{
+    avlNode* b = curr->right;
+
+    curr->right = b->left;
+    b->left = curr;
+
+    setHeight(curr);
+    setHeight(b);
+
+    return b;
+}
+
+void avlNode::setHeight(avlNode*& curr)
+{
+    curr->height = heightOf(curr->left) - heightOf(curr->right);
 }
