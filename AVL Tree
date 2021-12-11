@@ -1,0 +1,134 @@
+#include <iostream>
+#include <math.h>
+using namespace std;
+
+class BST {
+private:
+    int val;
+    int height;
+    BST *right;
+    BST *left;
+    static BST *root;
+
+public:
+    BST(int d) { val = d; left = right = nullptr; height = 0; }
+    static void insert(int val, BST *&temp_root = root);
+    static void display(BST *temp_root = root);
+    static int getHeight(BST* curr);
+    static BST* singleRotationLL(BST*& curr);
+    static BST* singleRotationRR(BST*& curr);
+    static BST* doubleRotationLR(BST*& curr);
+    static BST* doubleRotationRL(BST*& curr);
+    static void setHeight(BST*& curr);
+};
+
+BST *BST::root = nullptr;
+
+BST* BST::doubleRotationLR(BST *&curr) {
+    curr->left = singleRotationRR(curr->left);
+
+    return singleRotationLL(curr);
+}
+
+BST* BST::doubleRotationRL(BST *&curr) {
+    curr->right = singleRotationLL(curr->right);
+
+    return singleRotationRR(curr);
+}
+
+BST* BST::singleRotationLL(BST *&curr) {
+    BST* k = curr->left;
+
+    curr->left = k->right;
+    k->right = curr;
+
+    setHeight(curr);
+    setHeight(k);
+    return k;
+}
+
+BST* BST::singleRotationRR(BST *&curr) {
+    BST* k = curr->right;
+
+    curr->right = k->left;
+    k->left = curr;
+
+    setHeight(curr);
+    setHeight(k);
+    return k;
+}
+
+void BST::insert(int val, BST *&temp_root) {
+    if (temp_root == nullptr) {
+        temp_root = new BST(val);
+        return;
+    }
+    else if (val < temp_root->val) {
+        insert(val, temp_root->left);
+
+        if(getHeight(temp_root->left) - getHeight(temp_root->right) == 2)
+        {
+            //ll
+            if(val < temp_root->left->val)
+            {
+                temp_root = singleRotationLL(temp_root);
+            }
+            else // lr
+            {
+                temp_root = doubleRotationLR(temp_root);
+            }
+        }
+    }
+    else if (val > temp_root->val) {
+        insert(val, temp_root->right);
+
+        if(getHeight(temp_root->right) - getHeight(temp_root->left) == 2)
+        {
+            //rr
+            if(val > temp_root->right->val)
+            {
+                temp_root = singleRotationRR(temp_root);
+            }
+            else
+            {
+                temp_root = doubleRotationRL(temp_root);
+            }
+        }
+    }
+
+    setHeight(temp_root);
+}
+
+void BST::setHeight(BST *&curr) {
+    curr->height = max(getHeight(curr->left), getHeight(curr->right)) + 1;
+}
+
+int BST::getHeight(BST *curr) {
+    if(curr == nullptr)
+        return -1;
+
+    return curr->height;
+}
+
+void BST::display(BST *temp_root) {
+    if (temp_root == nullptr) {
+        return;
+    }
+    display(temp_root->left);
+    cout << temp_root->val << endl;
+    display(temp_root->right);
+}
+
+int main() {
+    BST::insert(50);
+    BST::insert(30);
+    BST::insert(10);
+    BST::insert(70);
+    BST::insert(60);
+    BST::insert(20);
+    BST::insert(80);
+
+    BST::display();
+
+    return 0;
+}
